@@ -9,7 +9,7 @@ LOG="$DATADIR/watchdog.log"
 [ -f "$DATADIR/disable" ] && exit 0
 [ -x "$WATCHDOG" ] || exit 0
 
-mkdir -p "$DATADIR/auths" "$DATADIR/logs"
+mkdir -p "$DATADIR/auths" "$DATADIR/logs" "$DATADIR/static"
 
 if [ -f "$PIDFILE" ]; then
   pid=$(cat "$PIDFILE" 2>/dev/null)

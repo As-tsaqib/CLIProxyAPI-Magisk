@@ -1,66 +1,81 @@
 # CLIProxyAPI Magisk
 
-Run [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) as a Magisk boot service on rooted Android.
+ARM64 Android Magisk/KernelSU/Next SU module builder for [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI).
 
 Author: Rofiq
 
-## What It Does
+This repository does not fork CLIProxyAPI source code. GitHub Actions downloads official upstream release assets, overlays the Magisk packaging files, bundles the dashboard, then publishes a release with the same upstream tag.
 
-- Starts CLIProxyAPI automatically after boot.
-- Restarts CLIProxyAPI when it crashes.
+## Release Flow
+
+- Scheduled workflow checks latest upstream CLIProxyAPI release every 6 hours.
+- If this repo has no release with that tag, it builds `cliproxyapi-magisk.zip`.
+- Manual workflow can build latest or a specific upstream tag.
+- `force=true` rebuilds an existing release.
+
+## Runtime Behavior
+
+- Starts CLIProxyAPI after Android boot.
+- Restarts CLIProxyAPI if it crashes.
 - Bundles `management.html` dashboard for offline first run.
-- Keeps editable runtime data outside module path.
-- Tracks upstream CLIProxyAPI releases with GitHub Actions.
-- Publishes a Magisk ZIP release using the same upstream version tag.
-- Updates `update.json` for Magisk update checks.
+- Stores config/state in `/data/adb/cliproxyapi`.
+- Writes logs to `/data/adb/cliproxyapi`.
+- Serves API at `http://127.0.0.1:8317` by default.
 
-## Runtime Paths
+Disable autostart:
+
+```sh
+touch /data/adb/cliproxyapi/disable
+```
+
+Stop once:
+
+```sh
+touch /data/adb/cliproxyapi/stop
+```
+
+## Paths
 
 - Config: `/data/adb/cliproxyapi/config.yaml`
 - Auth files: `/data/adb/cliproxyapi/auths`
 - App log: `/data/adb/cliproxyapi/cliproxyapi.log`
 - Watchdog log: `/data/adb/cliproxyapi/watchdog.log`
 - Dashboard: `/data/adb/cliproxyapi/static/management.html`
-- Disable flag: `/data/adb/cliproxyapi/disable`
-- Stop once: `/data/adb/cliproxyapi/stop`
 
-## Default Endpoint
+## LAN Access
 
-```text
-http://127.0.0.1:8317
-```
-
-For LAN access, edit `/data/adb/cliproxyapi/config.yaml`:
+Edit `/data/adb/cliproxyapi/config.yaml`:
 
 ```yaml
 host: "0.0.0.0"
 port: 8317
 ```
 
-## Manual Control
+## Manual Build In Actions
 
-```sh
-su -c 'touch /data/adb/cliproxyapi/disable'
-su -c 'rm /data/adb/cliproxyapi/disable'
-su -c 'touch /data/adb/cliproxyapi/stop'
-su -c 'tail -f /data/adb/cliproxyapi/watchdog.log'
-su -c 'tail -f /data/adb/cliproxyapi/cliproxyapi.log'
+Open **Actions → Release Magisk Module → Run workflow**.
+
+- `upstream_tag` empty: build latest upstream release.
+- `upstream_tag=v7.2.45`: build specific release tag.
+- `force=true`: rebuild even if release exists.
+
+## Local Build
+
+Put files here:
+
+```text
+packaging/magisk/bin/cli-proxy-api
+packaging/magisk/static/management.html
 ```
 
-## Build Locally
-
-Put upstream binary at `bin/cli-proxy-api`, then run:
+Then run:
 
 ```sh
-./scripts/build.sh
+VERSION=v7.2.45 VERSION_CODE=7002045 ./packaging/magisk/build-module.sh
 ```
 
 Output:
 
 ```text
-dist/cliproxyapi-magisk.zip
+dist/magisk/cliproxyapi-magisk.zip
 ```
-
-## Auto Release
-
-`.github/workflows/release.yml` checks latest upstream release from `router-for-me/CLIProxyAPI`, downloads `linux_aarch64` binary plus `management.html`, updates `module.prop`, builds ZIP, then creates/updates GitHub release with the same tag.
