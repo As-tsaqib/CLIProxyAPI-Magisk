@@ -4,3 +4,4 @@ tmp/
 bin/cli-proxy-api
 __pycache__/
 *.pyc
+static/management.html

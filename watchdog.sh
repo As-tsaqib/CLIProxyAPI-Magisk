@@ -5,6 +5,7 @@ DATADIR=/data/adb/cliproxyapi
 BINARY="$MODDIR/bin/cli-proxy-api"
 CONFIG="$DATADIR/config.yaml"
 DEFAULT_CONFIG="$MODDIR/config/config.yaml"
+STATIC_DIR="$DATADIR/static"
 APP_LOG="$DATADIR/cliproxyapi.log"
 PIDFILE="$DATADIR/cliproxyapi.pid"
 DISABLE="$DATADIR/disable"
@@ -18,10 +19,14 @@ log() {
 
 start_app() {
   [ -x "$BINARY" ] || { log "missing binary: $BINARY"; return 1; }
-  mkdir -p "$DATADIR/auths" "$DATADIR/logs"
+  mkdir -p "$DATADIR/auths" "$DATADIR/logs" "$STATIC_DIR"
   [ -f "$CONFIG" ] || cp "$DEFAULT_CONFIG" "$CONFIG"
+  if [ ! -f "$STATIC_DIR/management.html" ] && [ -f "$MODDIR/static/management.html" ]; then
+    cp "$MODDIR/static/management.html" "$STATIC_DIR/management.html"
+    chmod 0644 "$STATIC_DIR/management.html"
+  fi
   cd "$DATADIR" || return 1
-  nohup "$BINARY" --config "$CONFIG" >> "$APP_LOG" 2>&1 &
+  MANAGEMENT_STATIC_PATH="$STATIC_DIR" nohup "$BINARY" --config "$CONFIG" >> "$APP_LOG" 2>&1 &
   echo $! > "$PIDFILE"
   log "started cli-proxy-api pid=$!"
 }

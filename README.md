@@ -8,6 +8,7 @@ Author: Rofiq
 
 - Starts CLIProxyAPI automatically after boot.
 - Restarts CLIProxyAPI when it crashes.
+- Bundles `management.html` dashboard for offline first run.
 - Keeps editable runtime data outside module path.
 - Tracks upstream CLIProxyAPI releases with GitHub Actions.
 - Publishes a Magisk ZIP release using the same upstream version tag.
@@ -19,6 +20,7 @@ Author: Rofiq
 - Auth files: `/data/adb/cliproxyapi/auths`
 - App log: `/data/adb/cliproxyapi/cliproxyapi.log`
 - Watchdog log: `/data/adb/cliproxyapi/watchdog.log`
+- Dashboard: `/data/adb/cliproxyapi/static/management.html`
 - Disable flag: `/data/adb/cliproxyapi/disable`
 - Stop once: `/data/adb/cliproxyapi/stop`
 
@@ -61,4 +63,4 @@ dist/cliproxyapi-magisk.zip
 
 ## Auto Release
 
-`.github/workflows/release.yml` checks latest upstream release from `router-for-me/CLIProxyAPI`, downloads `linux_aarch64` binary, updates `module.prop`, builds ZIP, then creates/updates GitHub release with the same tag.
+`.github/workflows/release.yml` checks latest upstream release from `router-for-me/CLIProxyAPI`, downloads `linux_aarch64` binary plus `management.html`, updates `module.prop`, builds ZIP, then creates/updates GitHub release with the same tag.

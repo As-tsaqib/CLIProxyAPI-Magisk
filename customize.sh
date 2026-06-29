@@ -11,8 +11,15 @@ ui_print "- Arch: $ARCH"
 [ "$ARCH" = "arm64" ] || abort "Unsupported arch: $ARCH. Need arm64-v8a."
 [ -f "$BIN" ] || abort "Missing bundled binary: bin/cli-proxy-api"
 
-mkdir -p "$DATADIR/auths" "$DATADIR/logs"
+mkdir -p "$DATADIR/auths" "$DATADIR/logs" "$DATADIR/static"
 chmod 0700 "$DATADIR" "$DATADIR/auths" "$DATADIR/logs"
+chmod 0755 "$DATADIR/static"
+
+if [ -f "$MODPATH/static/management.html" ]; then
+  cp "$MODPATH/static/management.html" "$DATADIR/static/management.html" || abort "Dashboard copy failed"
+  chmod 0644 "$DATADIR/static/management.html"
+  ui_print "- Installed dashboard: $DATADIR/static/management.html"
+fi
 
 if [ ! -f "$DATADIR/config.yaml" ]; then
   cp "$MODPATH/config/config.yaml" "$DATADIR/config.yaml" || abort "Config copy failed"

@@ -14,6 +14,7 @@ ITEMS = [
     "watchdog.sh",
     "uninstall.sh",
     "config",
+    "static",
     "META-INF",
     "README.md",
     "update.json",

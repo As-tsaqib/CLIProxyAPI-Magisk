@@ -62,6 +62,25 @@ jobs:
           tar -xzf "tmp/$ASSET" -C tmp cli-proxy-api
           install -m 0755 tmp/cli-proxy-api bin/cli-proxy-api
 
+
+      - name: Download dashboard asset
+        if: steps.existing.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p static tmp
+          panel_json=$(gh api repos/router-for-me/Cli-Proxy-API-Management-Center/releases/latest)
+          panel_url=$(printf '%s' "$panel_json" | jq -r '.assets[] | select(.name == "management.html") | .browser_download_url')
+          panel_digest=$(printf '%s' "$panel_json" | jq -r '.assets[] | select(.name == "management.html") | .digest // ""')
+          [ -n "$panel_url" ] || { echo "Missing management.html asset" >&2; exit 1; }
+          curl -fL "$panel_url" -o static/management.html
+          if [ -n "$panel_digest" ] && [ "$panel_digest" != "null" ]; then
+            expected=${panel_digest#sha256:}
+            actual=$(sha256sum static/management.html | awk '{print $1}')
+            [ "$expected" = "$actual" ] || { echo "management.html checksum mismatch" >&2; exit 1; }
+          fi
+
       - name: Update module metadata
         if: steps.existing.outputs.exists == 'false'
         env:
