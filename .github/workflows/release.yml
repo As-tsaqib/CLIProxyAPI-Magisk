@@ -20,9 +20,9 @@ permissions:
 
 jobs:
   release:
-    name: Build upstream CLIProxyAPI release as Magisk module
+    name: Build upstream CLIProxyAPI release as Android Magisk module
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - name: Checkout packaging repo
@@ -45,16 +45,9 @@ jobs:
           fi
           tag=$(printf '%s' "$json" | jq -r .tag_name)
           version=${tag#v}
-          asset="CLIProxyAPI_${version}_linux_aarch64.tar.gz"
-          url=$(printf '%s' "$json" | jq -r --arg asset "$asset" '.assets[] | select(.name == $asset) | .browser_download_url')
-          checksum_url=$(printf '%s' "$json" | jq -r '.assets[] | select(.name == "checksums.txt") | .browser_download_url')
-          [ -n "$url" ] || { echo "Missing asset: $asset" >&2; exit 1; }
           sha=$(gh api "repos/router-for-me/CLIProxyAPI/git/ref/tags/$tag" --jq '.object.sha' 2>/dev/null || true)
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "asset=$asset" >> "$GITHUB_OUTPUT"
-          echo "url=$url" >> "$GITHUB_OUTPUT"
-          echo "checksum_url=$checksum_url" >> "$GITHUB_OUTPUT"
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
 
       - name: Skip existing release
@@ -73,22 +66,46 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Download upstream binary
+      - name: Checkout upstream CLIProxyAPI
         if: steps.existing.outputs.skip != 'true'
-        working-directory: cliproxyapi-magisk
-        env:
-          URL: ${{ steps.upstream.outputs.url }}
-          CHECKSUM_URL: ${{ steps.upstream.outputs.checksum_url }}
-          ASSET: ${{ steps.upstream.outputs.asset }}
+        uses: actions/checkout@v4
+        with:
+          repository: router-for-me/CLIProxyAPI
+          ref: ${{ steps.upstream.outputs.tag }}
+          path: cliproxyapi
+          fetch-depth: 0
+
+      - name: Set up Go
+        if: steps.existing.outputs.skip != 'true'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.x'
+          cache: true
+          cache-dependency-path: cliproxyapi/go.sum
+
+      - name: Refresh models catalog
+        if: steps.existing.outputs.skip != 'true'
+        working-directory: cliproxyapi
         run: |
           set -euo pipefail
-          mkdir -p tmp packaging/magisk/bin
-          curl -fL "$URL" -o "tmp/$ASSET"
-          curl -fL "$CHECKSUM_URL" -o tmp/checksums.txt
-          grep " $ASSET$" tmp/checksums.txt > tmp/checksum-line.txt
-          (cd tmp && sha256sum -c checksum-line.txt)
-          tar -xzf "tmp/$ASSET" -C tmp cli-proxy-api
-          install -m 0755 tmp/cli-proxy-api packaging/magisk/bin/cli-proxy-api
+          git fetch --depth 1 https://github.com/router-for-me/models.git main
+          git show FETCH_HEAD:models.json > internal/registry/models/models.json
+
+      - name: Build Android binary
+        if: steps.existing.outputs.skip != 'true'
+        working-directory: cliproxyapi
+        env:
+          TAG: ${{ steps.upstream.outputs.tag }}
+          VERSION: ${{ steps.upstream.outputs.version }}
+        run: |
+          set -euo pipefail
+          commit=$(git rev-parse --short HEAD)
+          build_date=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          mkdir -p ../cliproxyapi-magisk/packaging/magisk/bin
+          CGO_ENABLED=0 GOOS=android GOARCH=arm64 go build -buildvcs=false \
+            -ldflags="-s -w -X main.Version=${VERSION} -X main.Commit=${commit} -X main.BuildDate=${build_date}" \
+            -o ../cliproxyapi-magisk/packaging/magisk/bin/cli-proxy-api ./cmd/server/
+          readelf -l ../cliproxyapi-magisk/packaging/magisk/bin/cli-proxy-api | grep -q '/system/bin/linker64'
 
       - name: Download dashboard asset
         if: steps.existing.outputs.skip != 'true'
@@ -172,7 +189,7 @@ jobs:
             dist/magisk/cliproxyapi-magisk.zip \
             dist/magisk/checksums.txt \
             --title "CLIProxyAPI Magisk $TAG" \
-            --notes "ARM64 Android Magisk module built from upstream CLIProxyAPI $TAG at ${UPSTREAM_SHA:-unknown}. Dashboard bundled by default. Author: Rofiq."
+            --notes "ARM64 Android Magisk module built from upstream CLIProxyAPI $TAG at ${UPSTREAM_SHA:-unknown}. Android-native binary, dashboard bundled. Author: Rofiq."
 
       - name: Upload Magisk artifact
         if: steps.existing.outputs.skip != 'true'

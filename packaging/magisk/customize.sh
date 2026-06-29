@@ -28,7 +28,7 @@ else
   ui_print "- Kept config: $DATADIR/config.yaml"
 fi
 
-chmod 0755 "$BIN" "$MODPATH/service.sh" "$MODPATH/watchdog.sh" "$MODPATH/post-fs-data.sh" "$MODPATH/uninstall.sh"
+chmod 0755 "$BIN" "$MODPATH/service.sh" "$MODPATH/watchdog.sh" "$MODPATH/post-fs-data.sh" "$MODPATH/uninstall.sh" "$MODPATH/action.sh"
 ui_print "- Endpoint default: http://127.0.0.1:8317"
 ui_print "- Reboot to start service"
 ui_print "- Disable: touch $DATADIR/disable"

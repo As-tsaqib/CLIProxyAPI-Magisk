@@ -4,12 +4,12 @@ ARM64 Android Magisk/KernelSU/Next SU module builder for [CLIProxyAPI](https://g
 
 Author: Rofiq
 
-This repository does not fork CLIProxyAPI source code. GitHub Actions downloads official upstream release assets, overlays the Magisk packaging files, bundles the dashboard, then publishes a release with the same upstream tag.
+This repository does not fork CLIProxyAPI source code. GitHub Actions checks out the official upstream release tag, builds an Android-native ARM64 binary, overlays the Magisk packaging files, bundles the dashboard, then publishes a release with the same upstream tag.
 
 ## Release Flow
 
 - Scheduled workflow checks latest upstream CLIProxyAPI release every 6 hours.
-- If this repo has no release with that tag, it builds `cliproxyapi-magisk.zip`.
+- If this repo has no release with that tag, it builds Android ARM64 `cliproxyapi-magisk.zip`.
 - Manual workflow can build latest or a specific upstream tag.
 - `force=true` rebuilds an existing release.
 
