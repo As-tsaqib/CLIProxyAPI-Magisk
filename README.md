@@ -81,3 +81,16 @@ Output:
 ```text
 dist/magisk/cliproxyapi-magisk.zip
 ```
+
+## Termux CLI Wrapper
+
+Module installs `cliproxyapi` into Termux when Termux exists. It forwards all CLIProxyAPI flags through root and injects the module config by default.
+
+Examples:
+
+```sh
+cliproxyapi -h
+cliproxyapi -codex-login -no-browser
+cliproxyapi -codex-device-login
+cliproxyapi -claude-login -no-browser
+```

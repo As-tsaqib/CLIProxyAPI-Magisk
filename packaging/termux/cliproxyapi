@@ -1,2 +1,26 @@
 #!/data/data/com.termux/files/usr/bin/sh
-exec su -c "/data/adb/modules/cliproxyapi/bin/cli-proxy-api $*"
+
+BIN=/data/adb/modules/cliproxyapi/bin/cli-proxy-api
+CONFIG=/data/adb/cliproxyapi/config.yaml
+
+quote() {
+  printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"
+}
+
+has_config=0
+for arg in "$@"; do
+  case "$arg" in
+    -config|--config|-config=*|--config=*) has_config=1 ;;
+  esac
+done
+
+cmd=$(quote "$BIN")
+if [ "$has_config" -eq 0 ]; then
+  cmd="$cmd -config $(quote "$CONFIG")"
+fi
+
+for arg in "$@"; do
+  cmd="$cmd $(quote "$arg")"
+done
+
+exec su -c "$cmd"

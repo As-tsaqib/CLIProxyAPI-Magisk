@@ -29,6 +29,11 @@ else
 fi
 
 chmod 0755 "$BIN" "$MODPATH/service.sh" "$MODPATH/watchdog.sh" "$MODPATH/post-fs-data.sh" "$MODPATH/uninstall.sh" "$MODPATH/action.sh"
+TERMUX_BIN=/data/data/com.termux/files/usr/bin
+if [ -d "$TERMUX_BIN" ] && [ -f "$MODPATH/termux-wrapper.sh" ]; then
+  cp "$MODPATH/termux-wrapper.sh" "$TERMUX_BIN/cliproxyapi" 2>/dev/null && chmod 0755 "$TERMUX_BIN/cliproxyapi" && ui_print "- Installed Termux wrapper: $TERMUX_BIN/cliproxyapi"
+fi
+
 ui_print "- Endpoint default: http://127.0.0.1:8317"
 ui_print "- Reboot to start service"
 ui_print "- Disable: touch $DATADIR/disable"
