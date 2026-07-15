@@ -288,10 +288,10 @@ jobs:
           set -euo pipefail
           core=${UPSTREAM_VERSION%%-*}
           IFS=. read -r major minor patch <<< "$core"
-          [ "$minor" -le 999 ] && [ "$patch" -le 999 ] || {
+          if [ "$minor" -gt 999 ] || [ "$patch" -gt 999 ]; then
             echo "Minor and patch versions must fit in three digits" >&2
             exit 1
-          }
+          fi
           base_code=$((10#$major * 1000000 + 10#$minor * 1000 + 10#$patch))
           code=$((base_code * 100 + REVISION))
 
