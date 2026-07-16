@@ -1,6 +1,6 @@
 {
-  "version": "v7.2.80-r2",
-  "versionCode": 700208002,
-  "zipUrl": "https://github.com/greencabe/CLIProxyAPI-Magisk/releases/download/v7.2.80-r2/cliproxyapi-magisk.zip",
-  "changelog": "https://github.com/greencabe/CLIProxyAPI-Magisk/releases/tag/v7.2.80-r2"
+  "version": "v7.2.80-r3",
+  "versionCode": 700208003,
+  "zipUrl": "https://github.com/greencabe/CLIProxyAPI-Magisk/releases/download/v7.2.80-r3/cliproxyapi-magisk.zip",
+  "changelog": "https://github.com/greencabe/CLIProxyAPI-Magisk/releases/download/v7.2.80-r3/release-notes.md"
 }
