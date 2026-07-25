@@ -3,7 +3,7 @@
 ARM64 Android Magisk/KernelSU/Next SU module builder for
 [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI).
 
-Author: Rofiq
+Author: As-tsaqib
 
 This repository does not fork CLIProxyAPI source code. GitHub Actions checks
 out an official upstream release, builds an Android-native ARM64 binary,
