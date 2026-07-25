@@ -227,7 +227,7 @@ jobs:
           mkdir -p ../cliproxyapi-magisk/packaging/magisk/bin
           CGO_ENABLED=1 GOOS=android GOARCH=arm64 CC="$ANDROID_CC" go build \
             -buildvcs=false -trimpath \
-            -ldflags="-s -w -buildid= -X main.Version=${VERSION} -X main.Commit=${SOURCE_SHA} -X main.BuildDate=${build_date}" \
+            -ldflags="-s -w -buildid= -checklinkname=0 -X main.Version=${VERSION} -X main.Commit=${SOURCE_SHA} -X main.BuildDate=${build_date}" \
             -o ../cliproxyapi-magisk/packaging/magisk/bin/cli-proxy-api ./cmd/server/
 
       - name: Download and verify dashboard asset
